@@ -22,7 +22,7 @@
         "wonderwp/dependency-injection": "dev-develop@dev"
     },
     "autoload": {
-        "psr-4": {"WonderWp\\Component\\Service\\": ""},
+        "psr-4": {"WonderWp\\Component\\Service\\": "src"},
         "exclude-from-classmap": [
             "/Tests/"
         ]
