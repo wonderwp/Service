@@ -1,0 +1,31 @@
+{
+    "name": "wonderwp/service",
+    "type": "library",
+    "description": "WonderWp Service Component",
+    "keywords": ["service"],
+    "homepage": "https://wonderwp.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jeremy Desvaux",
+            "homepage": "http://jdmweb.com"
+        },
+        {
+            "name": "WonderWp Community",
+            "homepage": "https://wonderwp.com/contributors"
+        }
+    ],
+    "require": {
+        "php": "~5.6|~7"
+    },
+    "require-dev": {
+        "wonderwp/dependency-injection": "dev-develop@dev"
+    },
+    "autoload": {
+        "psr-4": {"WonderWp\\Component\\Service\\": ""},
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
+    },
+    "minimum-stability": "dev"
+}
