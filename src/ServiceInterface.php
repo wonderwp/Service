@@ -13,6 +13,7 @@ interface ServiceInterface
     const HOOK_SERVICE_NAME             = 'hooks';
     const LIST_TABLE_SERVICE_NAME       = 'listTable';
     const MODEL_FORM_SERVICE_NAME       = 'modelForm';
+    const REPOSITORY_SERVICE_NAME       = 'repository';
     const ROUTE_SERVICE_NAME            = 'route';
     const SEARCH_SERVICE_NAME           = 'search';
     const SHORT_CODE_SERVICE_NAME       = 'shortCode';
