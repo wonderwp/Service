@@ -10,9 +10,11 @@ interface ServiceInterface
     const COMMAND_SERVICE_NAME          = 'command';
     const CUSTOM_POST_TYPE_SERVICE_NAME = 'custom_post_type';
     const DEACTIVATOR_NAME              = 'deactivator';
+    const FILTER_SERVICE_NAME           = 'filter';
     const HOOK_SERVICE_NAME             = 'hooks';
     const LIST_TABLE_SERVICE_NAME       = 'listTable';
     const MODEL_FORM_SERVICE_NAME       = 'modelForm';
+    const PAGINATION_SERVICE_NAME       = 'pagination';
     const REPOSITORY_SERVICE_NAME       = 'repository';
     const ROUTE_SERVICE_NAME            = 'route';
     const SEARCH_SERVICE_NAME           = 'search';
