@@ -9,6 +9,7 @@ interface ServiceInterface
     const ASSETS_SERVICE_NAME           = 'assets';
     const COMMAND_SERVICE_NAME          = 'command';
     const CUSTOM_POST_TYPE_SERVICE_NAME = 'custom_post_type';
+    const CUSTOM_FIELDS_SERVICE_NAME    = 'custom_fields';
     const DEACTIVATOR_NAME              = 'deactivator';
     const FILTER_SERVICE_NAME           = 'filter';
     const HOOK_SERVICE_NAME             = 'hooks';
@@ -19,5 +20,6 @@ interface ServiceInterface
     const ROUTE_SERVICE_NAME            = 'route';
     const SEARCH_SERVICE_NAME           = 'search';
     const SHORT_CODE_SERVICE_NAME       = 'shortCode';
+    const TAXONOMY_SERVICE_NAME         = 'taxonomy';
     const VIEW_SERVICE_NAME             = 'view';
 }

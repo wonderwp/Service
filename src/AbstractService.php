@@ -2,12 +2,14 @@
 
 namespace WonderWp\Component\Service;
 
+use WonderWp\Component\DependencyInjection\Container;
+use WonderWp\Component\Hook\Traits\HasHookManagerInterface;
 use WonderWp\Component\PluginSkeleton\AbstractManager;
 use WonderWp\Component\PluginSkeleton\ManagerAwareInterface;
 use WonderWp\Component\PluginSkeleton\ManagerAwareTrait;
 use WonderWp\Component\PluginSkeleton\Service\RegistrableInterface;
 
-abstract class AbstractService implements ServiceInterface
+abstract class AbstractService implements ServiceInterface, ManagerAwareInterface
 {
     use ManagerAwareTrait;
 
@@ -16,7 +18,10 @@ abstract class AbstractService implements ServiceInterface
      *
      * @param AbstractManager $manager
      */
-    public function __construct(AbstractManager $manager = null) { $this->manager = $manager; }
+    public function __construct(AbstractManager $manager = null)
+    {
+        $this->manager = $manager;
+    }
 
 
     /**
@@ -26,8 +31,11 @@ abstract class AbstractService implements ServiceInterface
      * @return array
      * You can take the result of the autoload method and pass it back via the $classNameFromFiles parameter to speed up the process
      */
-    public function autoload(array $classNameFromFiles = [], array $discoveryPaths = [], callable $successCallback = null): array
+    public function autoload(array $classNameFromFiles = [], array $discoveryPaths = [], callable $successCallback = null, array $excludedClasses = []): array
     {
+        if (empty($discoveryPaths)) {
+            throw new \RuntimeException('[WonderWp] You must provide at least one discovery path to autoload classes');
+        }
         $includedFiles = get_included_files();
 
         if (is_null($successCallback)) {
@@ -36,7 +44,7 @@ abstract class AbstractService implements ServiceInterface
             };
         }
 
-        if(!empty($discoveryPaths)) {
+        if (!empty($discoveryPaths)) {
             $filesToAutoLoad = $this->discover($discoveryPaths);
 
             if (!empty($filesToAutoLoad)) {
@@ -46,20 +54,26 @@ abstract class AbstractService implements ServiceInterface
                             continue;
                         }
 
-                        if(!in_array($filePath, $includedFiles)) {
+                        if (!in_array($filePath, $includedFiles)) {
                             $included = include_once $filePath;
-
-                            if (!isset($classNameFromFiles[$filePath])) {
-                                //get the class from the file
-                                $classNameFromFiles[$filePath] = $this->getClassNameFromFile($filePath);
+                        }
+                        if (!isset($classNameFromFiles[$filePath])) {
+                            //get the class from the file
+                            $classInfos = $this->getClassInfos($filePath);
+                            if (!empty($classInfos['parentClass']) && !$classInfos['parentClass']->isAbstract()) {
+                                $excludedClasses[] = $classInfos['parentClass']->getName();
                             }
+                            if (in_array($classInfos['className'], $excludedClasses)) {
+                                continue;
+                            }
+                            $classNameFromFiles[$filePath] = $classInfos['className'];
                         }
                     }
                 }
             }
         }
 
-        if(!empty($classNameFromFiles)){
+        if (!empty($classNameFromFiles)) {
             foreach ($classNameFromFiles as $filePath => $className) {
                 if (class_exists($className)) {
                     $successCallback($className, $filePath);
@@ -70,11 +84,42 @@ abstract class AbstractService implements ServiceInterface
         return $classNameFromFiles;
     }
 
+    protected function getClassInfos(string $filePath)
+    {
+        $className = $this->getClassNameFromFile($filePath);
+        $reflection = new \ReflectionClass($className);
+        $classInfos = [
+            'className' => $className,
+            'reflection' => $reflection,
+            'parentClass' => $reflection->getParentClass(),
+        ];
+        return $classInfos;
+    }
+
+    protected function deductDefaultDiscoveryPaths(array $discoveryPathsRoots, string $discoverFolderSuffix): array
+    {
+        if (empty($discoveryPathsRoots)) {
+            return [];
+        }
+
+        $discoverFolderSuffixSlug = sanitize_title($discoverFolderSuffix);
+
+        $defaultPaths = [];
+        foreach ($discoveryPathsRoots as $key => $path) {
+            $defaultPaths[$key . '-' . $discoverFolderSuffixSlug] = $path . $discoverFolderSuffix . DIRECTORY_SEPARATOR;
+        }
+
+        return $defaultPaths;
+    }
+
     protected function autoloadFile(string $className, string $filePath): object
     {
         $instance = new $className();
-        if($instance instanceof ManagerAwareInterface){
+        if ($instance instanceof ManagerAwareInterface) {
             $instance->setManager($this->manager);
+        }
+        if ($instance instanceof HasHookManagerInterface) {
+            $instance->setHookManager(Container::getInstance()['wwp.hook.manager']);
         }
         if ($instance instanceof RegistrableInterface) {
             $instance->register();
@@ -111,6 +156,7 @@ abstract class AbstractService implements ServiceInterface
 
     public function discover(array|string $directoryPath, array $files = []): array
     {
+
         if (is_array($directoryPath) && !empty($directoryPath)) {
             foreach ($directoryPath as $path) {
                 if (is_dir($path)) {
@@ -137,6 +183,5 @@ abstract class AbstractService implements ServiceInterface
         }
         return $files;
     }
-
 
 }
