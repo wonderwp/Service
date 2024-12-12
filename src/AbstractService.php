@@ -63,7 +63,7 @@ abstract class AbstractService implements ServiceInterface, ManagerAwareInterfac
                             if (!empty($classInfos['parentClass']) && !$classInfos['parentClass']->isAbstract()) {
                                 $excludedClasses[] = $classInfos['parentClass']->getName();
                             }
-                            if (in_array($classInfos['className'], $excludedClasses)) {
+                            if (!isset($classInfos['className']) || in_array($classInfos['className'], $excludedClasses)) {
                                 continue;
                             }
                             $classNameFromFiles[$filePath] = $classInfos['className'];
@@ -87,6 +87,9 @@ abstract class AbstractService implements ServiceInterface, ManagerAwareInterfac
     protected function getClassInfos(string $filePath)
     {
         $className = $this->getClassNameFromFile($filePath);
+        if (empty($className)) {
+            return [];
+        }
         $reflection = new \ReflectionClass($className);
         $classInfos = [
             'className' => $className,
@@ -137,12 +140,18 @@ abstract class AbstractService implements ServiceInterface, ManagerAwareInterfac
         $content = file_get_contents($filePath);
         $namespace = $class = "";
         $tokens = token_get_all($content);
+        if(empty($tokens)){
+            return '';
+        }
         $count = count($tokens);
         for ($i = 2; $i < $count; $i++) {
-            if (isset($tokens[$i - 2][1]) && $tokens[$i - 2][1] === 'namespace') {
+            if(!is_array($tokens[$i])){
+                continue;
+            }
+            if (isset($tokens[$i - 2]) && isset($tokens[$i - 2][1]) && $tokens[$i - 2][1] === 'namespace') {
                 $namespace = $tokens[$i][1];
             }
-            if (isset($tokens[$i - 2][1]) && $tokens[$i - 2][1] === 'class') {
+            if (isset($tokens[$i - 2]) && isset($tokens[$i - 2][1]) && $tokens[$i - 2][1] === 'class') {
                 $class = $tokens[$i][1];
                 break;
             }
