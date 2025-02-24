@@ -8,6 +8,7 @@ interface ServiceInterface
     const API_SERVICE_NAME              = 'api';
     const ASSETS_SERVICE_NAME           = 'assets';
     const BLOCK_TYPE_SERVICE_NAME       = 'blockType';
+    const BLOCK_VARIATION_SERVICE_NAME  = 'blockVariation';
     const COMMAND_SERVICE_NAME          = 'command';
     const CUSTOM_POST_TYPE_SERVICE_NAME = 'custom_post_type';
     const CUSTOM_FIELDS_SERVICE_NAME    = 'custom_fields';
