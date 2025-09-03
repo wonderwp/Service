@@ -190,7 +190,7 @@ abstract class AbstractService implements ServiceInterface, ManagerAwareInterfac
         } elseif (is_string($directoryPath) && class_exists($directoryPath)) {
             $files[] = $directoryPath;
         }
-        return $files;
+        return apply_filters('wwp-abstractservice/files-discovery', $files, $directoryPath, $this, get_called_class());
     }
 
 }
