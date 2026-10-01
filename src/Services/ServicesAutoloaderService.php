@@ -310,10 +310,15 @@ class ServicesAutoloaderService
 
     /**
      * Check if cache system should be used.
+     * Default ON via WWP_SERVICE_AUTOLOAD_CACHE (undefined → true). Not tied to WP_CACHE.
      */
     protected function isCacheEnabled(): bool
     {
-        return defined('WP_CACHE') && WP_CACHE;
+        if (defined('WWP_SERVICE_AUTOLOAD_CACHE')) {
+            return (bool) \WWP_SERVICE_AUTOLOAD_CACHE;
+        }
+
+        return true;
     }
 
     /**
@@ -545,6 +550,7 @@ class ServicesAutoloaderService
             'fileMtimes' => $fileMtimes,
             'timestamp' => time(),
             'discoveryPaths' => $discoveryPaths,
+            'discoverySignature' => $this->getDiscoverySignature($discoveryPaths),
         ];
         $cache->set($cacheKey, $cacheData, null); // No TTL, persistent until invalidation
     }
@@ -650,7 +656,7 @@ class ServicesAutoloaderService
     }
 
     /**
-     * Get FileCache instance from container
+     * Get FileCache instance from container, with autonomous FileCache fallback.
      *
      * @return FileCache|null
      */
@@ -664,7 +670,17 @@ class ServicesAutoloaderService
         } catch (\Exception $e) {
             // Container not available or cache not registered
         }
-        return null;
+
+        // Autonomous fallback so autoload cache works without a DI-registered FileCache.
+        static $fallback = null;
+        if ($fallback instanceof FileCache) {
+            return $fallback;
+        }
+
+        $baseDir = defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : sys_get_temp_dir();
+        $fallback = new FileCache($baseDir . '/cache/wwp-service-autoload');
+
+        return $fallback;
     }
 
     public function clearDiscoveryCache()
@@ -676,7 +692,21 @@ class ServicesAutoloaderService
     }
 
     /**
-     * Validate cache data by checking file modification times
+     * Lightweight discovery signature (sorted file paths) so add/remove invalidates cache.
+     *
+     * @param array $discoveryPaths
+     */
+    protected function getDiscoverySignature(array $discoveryPaths): string
+    {
+        $files = $this->discover($discoveryPaths);
+        $files = array_values(array_filter($files, 'is_string'));
+        sort($files);
+
+        return md5(implode("\n", $files));
+    }
+
+    /**
+     * Validate cache data by checking discovery signature and file modification times
      *
      * @param array $cachedData
      * @return bool
@@ -685,6 +715,15 @@ class ServicesAutoloaderService
     {
         if (!isset($cachedData['classNameFromFiles']) || !isset($cachedData['fileMtimes'])) {
             return false;
+        }
+
+        if (!isset($cachedData['discoveryPaths'], $cachedData['discoverySignature'])) {
+            return false;
+        }
+
+        $currentSignature = $this->getDiscoverySignature($cachedData['discoveryPaths']);
+        if (!hash_equals((string) $cachedData['discoverySignature'], $currentSignature)) {
+            return false; // File added, removed, or renamed under discovery paths
         }
 
         $fileMtimes = $cachedData['fileMtimes'];
