@@ -15,7 +15,7 @@ abstract class AbstractContainerAwareService extends AbstractService implements 
      * @inheritdoc
      * @codeCoverageIgnore
      */
-    public function __construct(AbstractManager $manager = null)
+    public function __construct(?AbstractManager $manager = null)
     {
         parent::__construct($manager);
         $this->setContainer(Container::getInstance());
