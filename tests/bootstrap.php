@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 $candidates = [
-    // Standalone package install
-    dirname(__DIR__) . '/vendor/autoload.php',
-    // OT_cap / Bedrock host project (vendor/wonderwp/service)
+    // Bedrock / host project (prefer host PHPUnit over nested vendor/)
     dirname(__DIR__, 3) . '/autoload.php',
+    // Standalone package install (CI)
+    dirname(__DIR__) . '/vendor/autoload.php',
 ];
 
 $autoload = null;
