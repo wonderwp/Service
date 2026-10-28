@@ -30,7 +30,6 @@ final class TestableServicesAutoloaderService extends ServicesAutoloaderService
     public function getStats(): array
     {
         $ref = new \ReflectionProperty(ServicesAutoloaderService::class, 'stats');
-        $ref->setAccessible(true);
 
         return $ref->getValue($this);
     }
@@ -38,7 +37,6 @@ final class TestableServicesAutoloaderService extends ServicesAutoloaderService
     public function resetStats(): void
     {
         $ref = new \ReflectionProperty(ServicesAutoloaderService::class, 'stats');
-        $ref->setAccessible(true);
         $ref->setValue($this, [
             'totalTime' => 0.0,
             'discoveryTime' => 0.0,
