@@ -15,7 +15,7 @@ abstract class AbstractService implements ServiceInterface, ManagerAwareInterfac
      *
      * @param AbstractManager $manager
      */
-    public function __construct(AbstractManager $manager = null)
+    public function __construct(?AbstractManager $manager = null)
     {
         $this->manager = $manager;
     }

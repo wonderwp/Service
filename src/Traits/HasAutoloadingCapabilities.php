@@ -64,7 +64,7 @@ trait HasAutoloadingCapabilities
      * @param array $excludedClasses
      * @return array
      */
-    public function autoload(array $classNameFromFiles = [], array $discoveryPaths = [], callable $successCallback = null, array $excludedClasses = []): array
+    public function autoload(array $classNameFromFiles = [], array $discoveryPaths = [], ?callable $successCallback = null, array $excludedClasses = []): array
     {
         $classNameFromFiles = $this->resolveClassNameFromFiles($classNameFromFiles);
         $discoveryPaths     = $this->resolveDiscoveryPaths($discoveryPaths);
@@ -109,7 +109,7 @@ trait HasAutoloadingCapabilities
      * @param callable|null $successCallback
      * @return callable
      */
-    protected function resolveSuccessCallback(callable $successCallback = null): callable
+    protected function resolveSuccessCallback(?callable $successCallback = null): callable
     {
         if ($successCallback === null) {
             $successCallback = function ($className, $filePath) {

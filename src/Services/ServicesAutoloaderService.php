@@ -95,7 +95,7 @@ class ServicesAutoloaderService
      * @return array
      * You can take the result of the autoload method and pass it back via the $classNameFromFiles parameter to speed up the process
      */
-    public function autoload(array $classNameFromFiles = [], array $discoveryPaths = [], callable $successCallback = null, array $excludedClasses = []): array
+    public function autoload(array $classNameFromFiles = [], array $discoveryPaths = [], ?callable $successCallback = null, array $excludedClasses = []): array
     {
         // Initialize metrics for this autoload() call (no-op if metrics are disabled)
         $metrics = $this->initMetrics();
@@ -629,7 +629,7 @@ class ServicesAutoloaderService
         return $defaultPaths;
     }
 
-    public function autoloadFile(string $className, string $filePath, ManagerInterface $manager = null): object
+    public function autoloadFile(string $className, string $filePath, ?ManagerInterface $manager = null): object
     {
         $instance = new $className();
         if ($instance instanceof ManagerAwareInterface && $manager instanceof ManagerInterface) {
